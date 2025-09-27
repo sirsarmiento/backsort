@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Sorteo\Local;
 use App\Entity\Status;
 use App\Repository\EmpresaRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -56,9 +57,14 @@ class Empresa
      */
     private $url_logo;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Local::class, mappedBy="empresa")
+     */
+    private $locals;
+
     public function __construct()
     {
-
+        $this->locals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -146,6 +152,36 @@ class Empresa
     public function setUrlLogo(string $url_logo): self
     {
         $this->url_logo = $url_logo;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Local[]
+     */
+    public function getLocals(): Collection
+    {
+        return $this->locals;
+    }
+
+    public function addLocal(Local $local): self
+    {
+        if (!$this->locals->contains($local)) {
+            $this->locals[] = $local;
+            $local->setEmpresa($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLocal(Local $local): self
+    {
+        if ($this->locals->removeElement($local)) {
+            // set the owning side to null (unless already changed)
+            if ($local->getEmpresa() === $this) {
+                $local->setEmpresa(null);
+            }
+        }
 
         return $this;
     }
