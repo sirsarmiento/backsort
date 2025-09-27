@@ -123,7 +123,7 @@ class LocalController extends AbstractController
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="ID del producto a actualizar",
+     *         description="ID del Local a actualizar",
      *         @OA\Schema(type="integer")
      *     ),
      *     @OA\RequestBody(
@@ -154,10 +154,10 @@ class LocalController extends AbstractController
      *     ),
      *     @OA\Response(
      *         response=404,
-     *         description="Producto no encontrado",
+     *         description="Local no encontrado",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Producto no encontrado")
+     *             @OA\Property(property="message", type="string", example="Local no encontrado")
      *         )
      *     ),
      *     @OA\Response(
