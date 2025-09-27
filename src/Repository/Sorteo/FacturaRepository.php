@@ -2,7 +2,7 @@
 
 namespace App\Repository\Sorteo;
 
-use App\Entity\Sorteo\Cliente;
+use App\Entity\Sorteo\Factura;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\EntityManagerInterface;
@@ -13,29 +13,29 @@ use App\Entity\Empresa;
 Use App\Entity\User;
 
 /**
- * @method Cliente|null find($id, $lockMode = null, $lockVersion = null)
- * @method Cliente|null findOneBy(array $criteria, array $orderBy = null)
- * @method Cliente[]    findAll()
- * @method Cliente[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Factura|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Factura|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Factura[]    findAll()
+ * @method Factura[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ClienteRepository extends ServiceEntityRepository
+class FacturaRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry, Security $security)
     {
-        parent::__construct($registry, Cliente::class);
+        parent::__construct($registry, Factura::class);
         $this->security = $security;
     }
 
     /**
-     * Create cliente.
+     * Create factura.
      */
     public function post($data, $validator, $helper): JsonResponse
     {
         $entityManager = $this->getEntityManager();
 
         try {
-            // Crear entidad principal - cliente
-            $entity = $helper->setParametersToEntity(new Cliente(), $data);
+            // Crear entidad principal - factura
+            $entity = $helper->setParametersToEntity(new Factura(), $data);
             
             // Validar entidad principal
             $errors = $validator->validate($entity);
@@ -66,7 +66,7 @@ class ClienteRepository extends ServiceEntityRepository
             $entityManager->flush();
             
             return new JsonResponse([
-                'msg' => 'cliente creado exitosamente',
+                'msg' => 'factura creado exitosamente',
                 'id' => $entity->getId()
             ], 201);
             
@@ -81,23 +81,29 @@ class ClienteRepository extends ServiceEntityRepository
     public function getAll(): array 
     {
         try {
-        $clientes = $this->findBy([], ['id' => 'DESC']);
+        $facturas = $this->findBy([], ['id' => 'DESC']);
 
         $result = [];
 
-            foreach ($clientes as $cliente) {
+            foreach ($facturas as $factura) {
                 $result[] = [
-                    'id' => $cliente->getId(),
-                    'numeroDocumento' => $cliente->getNroDocumentoIdentidad(),
-                    'tipoDocumentoIdentidad' => $cliente->getTipoDocumentoIdentidad(),
-                    'primerNombre' => $cliente->getPrimerNombre(),
-                    'segundoNombre' => $cliente->getSegundoNombre(),
-                    'primerApellido' => $cliente->getPrimerApellido(),
-                    'segundoApellido' => $cliente->getSegundoApellido(),
-                    'email' => $cliente->getEmail(),
-                    'estado' => ($cliente->getEstado()!=null)?array("id"=>$cliente->getEstado()->getId(),"nombre"=>$cliente->getEstado()->getNombre()):[],
-                    'ciudad' => ($cliente->getCiudad()!=null)?array("id"=>$cliente->getCiudad()->getId(),"nombre"=>$cliente->getCiudad()->getNombre()):[],
-                    'direccion' => $cliente->getDireccion(),
+                    'id' => $factura->getId(),
+                    'numero' => $factura->getNumero(),
+                    'fecha' => $factura->getFecha()->format("Y-m-d"),
+                    'hora' => $factura->getHora(),
+                    'monto' => $factura->getMonto(),
+                    'tasa' => $factura->getTasa(),
+                    'cliente' => ($factura->getCliente()!=null)?array(
+                        "id"=>$factura->getCliente()->getId(),
+                        "tipoDocumentoIdentidad"=>$factura->getCliente()->getTipoDocumentoIdentidad(),
+                        "nroDocumentoIdentidad"=>$factura->getCliente()->getNroDocumentoIdentidad(),
+                        "primerNombre"=>$factura->getCliente()->getPrimerNombre(),
+                        "primerApellido"=>$factura->getCliente()->getPrimerApellido(),
+                        ):[],
+                    'local' => ($factura->getLocal()!=null)?array(
+                        "id"=>$factura->getLocal()->getId(),
+                        "nombre"=>$factura->getLocal()->getNombre()
+                        ):[],
                 ];
             }
 
@@ -105,31 +111,31 @@ class ClienteRepository extends ServiceEntityRepository
         
         } catch (\Exception $e) {
             return new JsonResponse([
-                'message' => 'Error al obtener los clientees: ' . $e->getMessage()
+                'message' => 'Error al obtener los facturaes: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
-     * Update cliente.
+     * Update factura.
      */
     public function update(int $id, $data, $validator, $helper): JsonResponse
     {
         $entityManager = $this->getEntityManager();
 
         try {
-            // Buscar el cliente existente
-            $cliente = $this->find($id);
+            // Buscar el factura existente
+            $factura = $this->find($id);
             
-            if (!$cliente) {
-                return new JsonResponse(['msg' => 'cliente no encontrado'], 404);
+            if (!$factura) {
+                return new JsonResponse(['msg' => 'factura no encontrada'], 404);
             }
 
             // Actualizar entidad principal
-            $cliente = $helper->setParametersToEntity($cliente, $data);
+            $factura = $helper->setParametersToEntity($factura, $data);
             
             // Validar entidad principal
-            $errors = $validator->validate($cliente);
+            $errors = $validator->validate($factura);
             if ($errors->count() > 0) {
                 $errorMessages = [];
                 foreach ($errors as $error) {
@@ -147,8 +153,8 @@ class ClienteRepository extends ServiceEntityRepository
                 ->find($this->security->getUser()->getId());
 
             if ($currentUser) {
-                $cliente->setUpdateBy($currentUser->getUserName());
-                $cliente->setUpdateAt(new \DateTime());
+                $factura->setUpdateBy($currentUser->getUserName());
+                $factura->setUpdateAt(new \DateTime());
             }
 
             // Persistir y flush
@@ -156,7 +162,7 @@ class ClienteRepository extends ServiceEntityRepository
             
             return new JsonResponse([
                 'msg' => 'Registro actualizado exitosamente',
-                'id' => $cliente->getId()
+                'id' => $factura->getId()
             ], 200);
             
         } catch (\Exception $e) {
@@ -165,36 +171,5 @@ class ClienteRepository extends ServiceEntityRepository
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
-
-    public function findByCi($ci){
-        $entityManager = $this->getEntityManager();
-        $clienteData= $this->createQueryBuilder('a')
-            ->andWhere('a.nroDocumentoIdentidad='.$ci)
-            ->orderBy('a.id', 'ASC')
-            ->getQuery()
-            ->getResult();
-        $dataUser=array();
-
-        foreach($clienteData as $cliente){
-            $dataUser=array(
-                'id'=>$cliente->getId(),
-                'numeroDocumento'=>$cliente->getNroDocumentoIdentidad(),
-                'tipoDocumentoIdentidad'=>$cliente->getTipoDocumentoIdentidad(),
-                'primerNombre'=>$cliente->getPrimerNombre(),
-                'segundoNombre'=>$cliente->getSegundoNombre(),
-                'primerApellido'=>$cliente->getPrimerApellido(),
-                'segundoApellido'=>$cliente->getSegundoApellido(),
-                'email'=>$cliente->getEmail(),
-                'codTelefono'=>$cliente->getCodTelefono(),
-                'nroTelefono'=>$cliente->getNroTelefono(),
-                'estado'=>($cliente->getEstado()!=null)?array("id"=>$cliente->getEstado()->getId(),"Nombre"=>$cliente->getEstado()->getNombre()):[],
-                'ciudad'=>($cliente->getCiudad()!=null)?array("id"=>$cliente->getCiudad()->getId(),"Nombre"=>$cliente->getCiudad()->getNombre()):[],
-                'direccion'=>$cliente->getDireccion(),
-            );
-        }
-        
-        return $dataUser;
- 
     }
 }

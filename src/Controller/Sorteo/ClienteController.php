@@ -4,7 +4,6 @@ namespace App\Controller\Sorteo;
 
 use App\Entity\Sorteo\Cliente;
 use App\Repository\Sorteo\ClienteRepository;
-use App\Repository\Sorteo\LocalRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -113,19 +112,21 @@ class ClienteController extends AbstractController
      * )
      * @Security(name="Bearer")
      */
-    public function findAll(Request $request,LocalRepository $repository): JsonResponse
+    public function findAll(Request $request,ClienteRepository $repository): JsonResponse
     {
+
         $data = $repository->getAll();
+
         // Verifica qué datos estás obteniendo
         if (empty($data)) {
             return new JsonResponse([
-                'message' => 'No se encontraron locales',
+                'message' => 'No se encontraron clientes',
                 'data' => []
             ], 200);
         }
         
         return new JsonResponse([
-            'message' => 'Locales obtenidos exitosamente',
+            'message' => 'Clientes obtenidos exitosamente',
             'data' => $data,
             'count' => count($data)
         ], 200);

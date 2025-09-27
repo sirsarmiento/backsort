@@ -5,6 +5,8 @@ namespace App\Entity\Sorteo;
 use App\Entity\Ciudad;
 use App\Entity\Estado;
 use App\Repository\Sorteo\ClienteRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -99,10 +101,16 @@ class Cliente
      */
     private $updateBy;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Factura::class, mappedBy="cliente")
+     */
+    private $facturas;
+
     public function __construct()
     {
         $this->createAt = new \DateTime();
         $this->createBy = 'system'; // Default creator, can be changed later
+        $this->facturas = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -299,6 +307,36 @@ class Cliente
     public function setNroTelefono(string $nroTelefono): self
     {
         $this->nroTelefono = $nroTelefono;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Factura[]
+     */
+    public function getFacturas(): Collection
+    {
+        return $this->facturas;
+    }
+
+    public function addFactura(Factura $factura): self
+    {
+        if (!$this->facturas->contains($factura)) {
+            $this->facturas[] = $factura;
+            $factura->setCliente($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFactura(Factura $factura): self
+    {
+        if ($this->facturas->removeElement($factura)) {
+            // set the owning side to null (unless already changed)
+            if ($factura->getCliente() === $this) {
+                $factura->setCliente(null);
+            }
+        }
 
         return $this;
     }

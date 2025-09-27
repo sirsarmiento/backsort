@@ -33,7 +33,7 @@ class LocalController extends AbstractController
      *             required={"nombre", "monto", "empresa_id"},
      *             @OA\Property(property="nombre", type="string", example="Local Principal", description="Nombre del local"),
      *             @OA\Property(property="monto", type="integer", example=1000, description="Monto del local"),
-     *             @OA\Property(property="empresa_id", type="integer", example=1, description="ID de la empresa a la que pertenece el local")
+     *             @OA\Property(property="empresa", type="integer", example=1, description="ID de la empresa a la que pertenece el local")
      *         )
      *     ),
      *     @OA\Response(
