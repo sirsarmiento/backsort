@@ -76,6 +76,16 @@ class Factura
      */
     private $updateBy;
 
+    /**
+     * @ORM\Column(type="decimal", precision=10, scale=2)
+     */
+    private $montoMin;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $print;
+
     public function __construct()
     {
         $this->createAt = new \DateTime();
@@ -215,6 +225,30 @@ class Factura
     public function setUpdateBy(?string $updateBy): self
     {
         $this->updateBy = $updateBy;
+
+        return $this;
+    }
+
+    public function getMontoMin(): ?string
+    {
+        return $this->montoMin;
+    }
+
+    public function setMontoMin(string $montoMin): self
+    {
+        $this->montoMin = $montoMin;
+
+        return $this;
+    }
+
+    public function getPrint(): ?int
+    {
+        return $this->print;
+    }
+
+    public function setPrint(int $print): self
+    {
+        $this->print = $print;
 
         return $this;
     }

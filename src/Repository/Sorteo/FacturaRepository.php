@@ -36,7 +36,25 @@ class FacturaRepository extends ServiceEntityRepository
         try {
             // Crear entidad principal - factura
             $entity = $helper->setParametersToEntity(new Factura(), $data);
+                        
+            // Convertir montos al formato correcto para la base de datos. Los montos mayores a 1000 me estaba guardando el primer numero ejemplo 1.500,00 me guardaba 1
+            if (isset($data['monto'])) {
+                // Asegurar que el monto sea un float/string numérico
+                $monto = is_numeric($data['monto']) ? $data['monto'] : floatval(str_replace(',', '.', str_replace('.', '', $data['monto'])));
+                $entity->setMonto((string) $monto);
+            }
             
+            if (isset($data['tasa'])) {
+                $tasa = is_numeric($data['tasa']) ? $data['tasa'] : floatval(str_replace(',', '.', str_replace('.', '', $data['tasa'])));
+                $entity->setTasa((string) $tasa);
+            }
+
+            if (isset($data['montoMin'])) {
+                // Asegurar que el monto sea un float/string numérico
+                $montoMin = is_numeric($data['montoMin']) ? $data['montoMin'] : floatval(str_replace(',', '.', str_replace('.', '', $data['montoMin'])));
+                $entity->setMontoMin((string) $montoMin);
+            }
+
             // Validar entidad principal
             $errors = $validator->validate($entity);
             if ($errors->count() > 0) {
@@ -92,13 +110,19 @@ class FacturaRepository extends ServiceEntityRepository
                     'fecha' => $factura->getFecha()->format("Y-m-d"),
                     'hora' => $factura->getHora(),
                     'monto' => $factura->getMonto(),
+                    'montoMin' => $factura->getMontoMin(),
                     'tasa' => $factura->getTasa(),
+                    'print' => $factura->getPrint(),
                     'cliente' => ($factura->getCliente()!=null)?array(
                         "id"=>$factura->getCliente()->getId(),
                         "tipoDocumentoIdentidad"=>$factura->getCliente()->getTipoDocumentoIdentidad(),
                         "nroDocumentoIdentidad"=>$factura->getCliente()->getNroDocumentoIdentidad(),
-                        "primerNombre"=>$factura->getCliente()->getPrimerNombre(),
-                        "primerApellido"=>$factura->getCliente()->getPrimerApellido(),
+                        "nombreCompleto" => trim(
+                                ($factura->getCliente()->getPrimerNombre() ?? '') . ' ' .
+                                ($factura->getCliente()->getSegundoNombre() ?? '') . ' ' .
+                                ($factura->getCliente()->getPrimerApellido() ?? '') . ' ' .
+                                ($factura->getCliente()->getSegundoApellido() ?? '')
+                            )
                         ):[],
                     'local' => ($factura->getLocal()!=null)?array(
                         "id"=>$factura->getLocal()->getId(),
