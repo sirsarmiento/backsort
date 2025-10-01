@@ -96,35 +96,20 @@ class EstadoController extends AbstractController
          return new JsonResponse($data,200);  
     }
 
-     /**
-        *  Get Estado by Pais Id.
-        * @Route("/api/estado/pais/{id}", methods={"GET"})
-        * @OA\Post(
-         * summary="Estado List",
-         * description="Estado List",
-         * operationId="Estadolista",
-         * tags={"Estado"},
-         * @OA\RequestBody(
-         *    required=true,
-         *    description="parametro",
-         *    @OA\JsonContent(
-         *       required={"page"},
-         *       @OA\Property(property="page", type="integer", format="integer", example="1"),
-         *       @OA\Property(property="rowByPage", type="integer", format="integer", example="1"),
-         *       @OA\Property(property="word", type="integer", format="integer", example="1"),
-         *    ),
-         * ),
-         * @OA\Response(
-         *    response=422,
-         *    description="Wrong credentials response",
-         *    @OA\JsonContent(
-         *       @OA\Property(property="message", type="string", example="Sorry, wrong email address or password. Please try again")
-         *        )
-         *     )
-         * )
-         * @OA\Tag(name="Estado")
-         * @Security(name="Bearer")
-    */   
+    /**
+    *  Get Estado by Pais Id.
+    * @Route("/api/estado/pais/{id}", methods={"GET"})
+    * @OA\Response(
+    *     response=200,
+    *     description="Returns estados by pais id",
+    *     @OA\JsonContent(
+    *       @OA\Property(property="nombre", type="string", format="string", example="Apure"),
+    *       @OA\Property(property="status", type="integer", format="integer", example="1"),
+    *       @OA\Property(property="pais", type="integer", format="integer", example="1"),
+    *     ),
+    * )
+    * @OA\Tag(name="Estado")
+    */
     public function findById($id,Request $request,EstadoRepository $repository): JsonResponse
     {
         $data = $repository
@@ -133,31 +118,31 @@ class EstadoController extends AbstractController
     }
 
 
-        /**
-        * @Route("/api/estado", methods={"POST"})
-        * @OA\Post(
-         * summary="Create Estado",
-         * description="Create Estado",
-         * operationId="Estado",
-         * tags={"Estado"},
-         * @OA\RequestBody(
-         *    required=true,
-         *    description="parametro",
-         *    @OA\JsonContent(
-         *       required={"page"},
-         *       @OA\Property(property="nombre", type="string", format="string", example="Apure"),
-         *       @OA\Property(property="status", type="integer", format="integer", example="1"),
-         *       @OA\Property(property="pais", type="integer", format="integer", example="1"),
-         *    ),
-         * ),
-         * @OA\Response(
-         *    response=422,
-         *    description="Wrong credentials response",
-         *    @OA\JsonContent(
-         *       @OA\Property(property="message", type="string", example="Sorry, wrong email address or password. Please try again")
-         *        )
-         *     )
-         * )
+    /**
+    * @Route("/api/estado", methods={"POST"})
+    * @OA\Post(
+        * summary="Create Estado",
+        * description="Create Estado",
+        * operationId="Estado",
+        * tags={"Estado"},
+        * @OA\RequestBody(
+        *    required=true,
+        *    description="parametro",
+        *    @OA\JsonContent(
+        *       required={"page"},
+        *       @OA\Property(property="nombre", type="string", format="string", example="Apure"),
+        *       @OA\Property(property="status", type="integer", format="integer", example="1"),
+        *       @OA\Property(property="pais", type="integer", format="integer", example="1"),
+        *    ),
+        * ),
+        * @OA\Response(
+        *    response=422,
+        *    description="Wrong credentials response",
+        *    @OA\JsonContent(
+        *       @OA\Property(property="message", type="string", example="Sorry, wrong email address or password. Please try again")
+        *        )
+        *     )
+        * )
     */    
 
     public function post(Request $request,ValidatorInterface $validator,Helper $helper): Response

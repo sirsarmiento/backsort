@@ -6,7 +6,7 @@
 parameters:
     photos_directory: '%kernel.project_dir%/public/'
     emailfrom: 'jpadron@gmail.com'
-    urlfrom: 'http://giep-platform.pafar.com.ve/'
+    urlfrom: 'https://platformsorteosstage.pafar.com.ve/'
     urlapi: 'https://bofficesorteosstage.pafar.com.ve/public/' 
     urlapilocal: 'C:/xampp/htdocs/backsorteo/public/'
     urlapistage: 'https://bofficesorteosstage.pafar.com.ve/public/'

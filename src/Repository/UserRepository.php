@@ -124,7 +124,7 @@ class UserRepository extends ServiceEntityRepository
                     $entityManager->flush();
                 }    
             }
-            $email->enviocorreo(array("email"=>$entity->getEmail()),"Estimado Sr(a):".$entity->getPrimerNombre()."<br><br>"." Su usuario para acceder al sistema es ".$entity->getUsername()." y el password es ".$psswd);
+            $email->enviocorreo(array("email"=>$entity->getEmail()),"Hola, ".$entity->getPrimerNombre(). " " . $entity->getPrimerApellido()."<br><br>"." Tu registro para el Sorteo Navideño ha sido confirmado.  Su usuario es  ".$entity->getUsername()." y su contraseña es ".$psswd);
             return new JsonResponse(['msg'=>'Registro Creado','id'=>$entity->getId()],200);
         }    
     }
