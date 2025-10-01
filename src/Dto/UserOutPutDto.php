@@ -74,7 +74,7 @@ class UserOutPutDto
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    public $createAt;
+    public $createdAt;
 
     /**
      * @ORM\Column(type="string", length=50, nullable=true)
@@ -249,9 +249,9 @@ class UserOutPutDto
 
 
 
-    public function getCreateAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?\DateTimeInterface
     {
-        return $this->createAt;
+        return $this->createdAt;
     }
 
 

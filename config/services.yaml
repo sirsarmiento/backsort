@@ -7,9 +7,9 @@ parameters:
     photos_directory: '%kernel.project_dir%/public/'
     emailfrom: 'jpadron@gmail.com'
     urlfrom: 'http://giep-platform.pafar.com.ve/'
-    urlapi: 'http://giepboffice.pafar.com.ve/public/'
-    urlapilocal: 'C:/xampp/htdocs/giep/public/'
-    urlapistage: 'http://bofficegiepstage.pafar.com.ve/public/'
+    urlapi: 'https://bofficesorteosstage.pafar.com.ve/public/' 
+    urlapilocal: 'C:/xampp/htdocs/backsorteo/public/'
+    urlapistage: 'https://bofficesorteosstage.pafar.com.ve/public/'
 
     urlapinotification: 'http://localhost:3000/notification/all/pagined'
     urlapipaginedWithoutReading: 'http://localhost:3000/notification/all/paginedWithoutReading'

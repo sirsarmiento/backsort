@@ -4,6 +4,7 @@ namespace App\Entity\Sorteo;
 
 use App\Entity\Sorteo\Local;
 use App\Entity\Sorteo\Cliente;
+use App\Entity\User;
 use App\Repository\Sorteo\FacturaRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -47,14 +48,19 @@ class Factura
     private $tasa;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Cliente::class, inversedBy="facturas")
-     */
-    private $cliente;
-
-    /**
      * @ORM\ManyToOne(targetEntity=Local::class, inversedBy="facturas")
      */
     private $local;
+
+    /**
+     * @ORM\Column(type="decimal", precision=10, scale=2)
+     */
+    private $montoMin;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $print;
 
     /**
      * @ORM\Column(type="datetime")
@@ -77,14 +83,10 @@ class Factura
     private $updateBy;
 
     /**
-     * @ORM\Column(type="decimal", precision=10, scale=2)
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="facturas")
      */
-    private $montoMin;
+    private $user;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $print;
 
     public function __construct()
     {
@@ -153,18 +155,6 @@ class Factura
     public function setTasa(string $tasa): self
     {
         $this->tasa = $tasa;
-
-        return $this;
-    }
-
-    public function getCliente(): ?Cliente
-    {
-        return $this->cliente;
-    }
-
-    public function setCliente(?Cliente $cliente): self
-    {
-        $this->cliente = $cliente;
 
         return $this;
     }
@@ -249,6 +239,18 @@ class Factura
     public function setPrint(int $print): self
     {
         $this->print = $print;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

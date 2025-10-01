@@ -63,7 +63,6 @@ class UserRepository extends ServiceEntityRepository
             return new JsonResponse(['msg'=>"El email,username o el numero de cédula ya se encuentra registrado"],409);
         }
 
-        //Sir. Comente porque estoy enviando un solo rol
         foreach($data["roles"] as $clave=>$valor){
                 $roles[]= $valor['rol'];            
         }
@@ -105,27 +104,28 @@ class UserRepository extends ServiceEntityRepository
                 $entity->setIdempresa($empresa);
             $entityManager->persist($entity);
             $entityManager->flush();
-            // foreach ($data["telefono"] as $key => $value) {
-            //     $entityTelefono=new Telefono();
-            //     $entityStatus = $entityManager->getRepository(Status::class)->findOneById(1);          
-            //     $entityTelefono->setIdUser($entity);
-            //     $entityTelefono->setNumero($value["numero"]);   
-            //     $entityTelefono->setCreateBy($currentUser->getUserName());
-            //     $entityTelefono->setIdStatus($entityStatus); 
-            //     $errors = $validator->validate($entityTelefono);
-            //     if($errors->count() > 0){
-            //         $errorsString = (string) $errors;
-            //         return new JsonResponse(['msg'=>$errorsString],500);
-            //     }else{
-            //         $empresa= $entityManager->getRepository(Empresa::class)->find($this->security->getUser()->getIdempresa());
-            //         if($empresa)
-            //            $entityTelefono->setIdempresa($empresa);
-            //         $entityManager->persist($entityTelefono);
-            //         $entityManager->flush();
-            //     }    
-            // }
+            //Guardar Telefonos
+            foreach ($data["telefono"] as $key => $value) {
+                $entityTelefono=new Telefono();
+                $entityStatus = $entityManager->getRepository(Status::class)->findOneById(1);          
+                $entityTelefono->setIdUser($entity);
+                $entityTelefono->setNumero($value["numero"]);   
+                $entityTelefono->setCreateBy($currentUser->getUserName());
+                $entityTelefono->setIdStatus($entityStatus); 
+                $errors = $validator->validate($entityTelefono);
+                if($errors->count() > 0){
+                    $errorsString = (string) $errors;
+                    return new JsonResponse(['msg'=>$errorsString],500);
+                }else{
+                    $empresa= $entityManager->getRepository(Empresa::class)->find($this->security->getUser()->getIdempresa());
+                    if($empresa)
+                       $entityTelefono->setIdempresa($empresa);
+                    $entityManager->persist($entityTelefono);
+                    $entityManager->flush();
+                }    
+            }
             $email->enviocorreo(array("email"=>$entity->getEmail()),"Estimado Sr(a):".$entity->getPrimerNombre()."<br><br>"." Su usuario para acceder al sistema es ".$entity->getUsername()." y el password es ".$psswd);
-            return new JsonResponse(['msg'=>'Registro Creado','id'=>$entity->getUsername()],200);
+            return new JsonResponse(['msg'=>'Registro Creado','id'=>$entity->getId()],200);
         }    
     }
 
@@ -191,8 +191,8 @@ class UserRepository extends ServiceEntityRepository
                 $userDto->foto= (is_null($valor->getFoto())) ? $this->assetPackage->getUrl($url.'\images\avatar_femenino.png'):$this->assetPackage->getUrl($stringFoto);                
             }
            
-            if($valor->getCreateAt()!=null){
-                $userDto->createAt=$valor->getCreateAt()->format("d/m/Y");
+            if($valor->getCreatedAt()!=null){
+                $userDto->createdAt=$valor->getCreatedAt()->format("d/m/Y");
             }    
             $userDto->updateBy=$valor->getUpdateBy();
             if($valor->getUpdateAt()!=null){           
@@ -261,8 +261,8 @@ class UserRepository extends ServiceEntityRepository
             }else{
                 $userDto->foto= (is_null($valor->getFoto())) ? $this->assetPackage->getUrl($url.'\images\avatar_femenino.png'):$this->assetPackage->getUrl($stringFoto);                
             }
-            if($valor->getCreateAt()!=null){
-                $userDto->createAt=$valor->getCreateAt()->format("d/m/Y");
+            if($valor->getCreatedAt()!=null){
+                $userDto->createdAt=$valor->getCreatedAt()->format("d/m/Y");
             }    
             $userDto->updateBy=$valor->getUpdateBy();
             if($valor->getUpdateAt()!=null){           
@@ -310,6 +310,7 @@ class UserRepository extends ServiceEntityRepository
             ->getResult();
         $dataUser=array();
         $telefonosUser=[];
+        
         foreach($userData as $clave=>$valor){
             $userDto =new UserOutPutDto();
             $userDto->id=$valor->getId();
@@ -340,8 +341,8 @@ class UserRepository extends ServiceEntityRepository
             }else{
                 $userDto->foto= (is_null($valor->getFoto())) ? $this->assetPackage->getUrl($url.'\images\avatar_femenino.png'):$this->assetPackage->getUrl($stringFoto);                
             }
-            if($valor->getCreateAt()!=null){
-                $userDto->createAt=$valor->getCreateAt()->format("d/m/Y");
+            if($valor->getCreatedAt()!=null){
+                $userDto->createdAt=$valor->getCreatedAt()->format("d/m/Y");
             }    
             $userDto->updateBy=$valor->getUpdateBy();
             if($valor->getUpdateAt()!=null){           
@@ -369,7 +370,7 @@ class UserRepository extends ServiceEntityRepository
 
             $userDto->componentes=$componentes;
             $userDto->roles= $rolesUser;
-            $userDto->redes=$redesSociales;
+            //$userDto->redes=$redesSociales;
             $rolesUser=[];
             $telefonosUser=[];
             $dataUser[]=$userDto;

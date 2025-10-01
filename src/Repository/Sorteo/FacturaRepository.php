@@ -96,7 +96,7 @@ class FacturaRepository extends ServiceEntityRepository
         }
     }
 
-    public function getAll(): array 
+    public function getAll($urlPhotoCI): array 
     {
         try {
         $facturas = $this->findBy([], ['id' => 'DESC']);
@@ -113,16 +113,17 @@ class FacturaRepository extends ServiceEntityRepository
                     'montoMin' => $factura->getMontoMin(),
                     'tasa' => $factura->getTasa(),
                     'print' => $factura->getPrint(),
-                    'cliente' => ($factura->getCliente()!=null)?array(
-                        "id"=>$factura->getCliente()->getId(),
-                        "tipoDocumentoIdentidad"=>$factura->getCliente()->getTipoDocumentoIdentidad(),
-                        "nroDocumentoIdentidad"=>$factura->getCliente()->getNroDocumentoIdentidad(),
+                    'cliente' => ($factura->getUser()!=null)?array(
+                        "id"=>$factura->getUser()->getId(),
+                        "tipoDocumentoIdentidad"=>$factura->getUser()->getTipoDocumentoIdentidad(),
+                        "nroDocumentoIdentidad"=>$factura->getUser()->getNumeroDocumento(),
                         "nombreCompleto" => trim(
-                                ($factura->getCliente()->getPrimerNombre() ?? '') . ' ' .
-                                ($factura->getCliente()->getSegundoNombre() ?? '') . ' ' .
-                                ($factura->getCliente()->getPrimerApellido() ?? '') . ' ' .
-                                ($factura->getCliente()->getSegundoApellido() ?? '')
-                            )
+                                ($factura->getUser()->getPrimerNombre() ?? '') . ' ' .
+                                ($factura->getUser()->getSegundoNombre() ?? '') . ' ' .
+                                ($factura->getUser()->getPrimerApellido() ?? '') . ' ' .
+                                ($factura->getUser()->getSegundoApellido() ?? '')
+                        ),
+                        "fotoCedula" => ($factura->getUser()->getFoto()) ? $urlPhotoCI . $factura->getUser()->getFoto() : null,
                         ):[],
                     'local' => ($factura->getLocal()!=null)?array(
                         "id"=>$factura->getLocal()->getId(),

@@ -66,15 +66,9 @@ class Ciudad
      */
     private $idempresa;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Cliente::class, mappedBy="ciudad")
-     */
-    private $clientes;
-
     public function __construct()
     {
         $this->users = new ArrayCollection();
-        $this->clientes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -204,36 +198,6 @@ class Ciudad
     public function setIdempresa(?Empresa $idempresa): self
     {
         $this->idempresa = $idempresa;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Cliente[]
-     */
-    public function getClientes(): Collection
-    {
-        return $this->clientes;
-    }
-
-    public function addCliente(Cliente $cliente): self
-    {
-        if (!$this->clientes->contains($cliente)) {
-            $this->clientes[] = $cliente;
-            $cliente->setCiudad($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCliente(Cliente $cliente): self
-    {
-        if ($this->clientes->removeElement($cliente)) {
-            // set the owning side to null (unless already changed)
-            if ($cliente->getCiudad() === $this) {
-                $cliente->setCiudad(null);
-            }
-        }
 
         return $this;
     }

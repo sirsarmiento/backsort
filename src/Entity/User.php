@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Entity\Empresa;
 use App\Entity\Riesgo\ProyectoResponsables;
+use App\Entity\Sorteo\Factura;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -174,6 +175,11 @@ class User implements UserInterface
      */
     private $idempresa;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Factura::class, mappedBy="user")
+     */
+    private $facturas;
+
 
     public function __construct()
     {
@@ -183,6 +189,8 @@ class User implements UserInterface
         $this->iduserhistbloqueo = new ArrayCollection();
         $this->cuentaEmails = new ArrayCollection();
         $this->histMovmtItemsIdUser = new ArrayCollection();
+        $this->facturas = new ArrayCollection();
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -309,12 +317,6 @@ class User implements UserInterface
 
         return $this;
     }
-
-    public function getCreateAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
 
     public function getUpdateBy(): ?string
     {
@@ -624,6 +626,36 @@ class User implements UserInterface
     public function setIdempresa(?Empresa $idempresa): self
     {
         $this->idempresa = $idempresa;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Factura[]
+     */
+    public function getFacturas(): Collection
+    {
+        return $this->facturas;
+    }
+
+    public function addFactura(Factura $factura): self
+    {
+        if (!$this->facturas->contains($factura)) {
+            $this->facturas[] = $factura;
+            $factura->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFactura(Factura $factura): self
+    {
+        if ($this->facturas->removeElement($factura)) {
+            // set the owning side to null (unless already changed)
+            if ($factura->getUser() === $this) {
+                $factura->setUser(null);
+            }
+        }
 
         return $this;
     }

@@ -17,9 +17,17 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Service\Helper;
 use Symfony\Component\Validator\Constraints\Json;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class FacturaController extends AbstractController
 {
+    private $params;
+
+    public function __construct(ParameterBagInterface $params)
+    {
+        $this->params = $params;
+    }
+
     /**
      * @Route("api/factura", methods={"POST"})
      * @OA\Post(
@@ -31,8 +39,8 @@ class FacturaController extends AbstractController
      *         required=true,
      *         description="Datos del factura",
      *         @OA\JsonContent(
-     *             required={"cliente", "local", "numero", "fecha", "hora", "monto", "tasa"},
-     *             @OA\Property(property="cliente", type="integer", example=1, description="ID del cliente"),
+     *             required={"user", "local", "numero", "fecha", "hora", "monto", "tasa"},
+     *             @OA\Property(property="user", type="integer", example=1, description="ID del usuario"),
      *             @OA\Property(property="local", type="integer", example=1, description="ID del local"),
      *             @OA\Property(property="numero", type="string", example="01234567", description="Numero de la factura"),
      *             @OA\Property(property="fecha", type="date", example="2022-04-01", description="Fecha de la factura"),
@@ -88,7 +96,7 @@ class FacturaController extends AbstractController
      *                 @OA\Items(
      *                     type="object",
      *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="cliente", type="string", example=1, description="Nombre del cliente"),
+     *                     @OA\Property(property="user", type="string", example=1, description="Nombre del usuario"),
      *                     @OA\Property(property="local", type="string", example=1, description="Nombre del local"),
      *                     @OA\Property(property="numero", type="string", example="01234567", description="Numero de la factura"),
      *                     @OA\Property(property="fecha", type="date", example="2022-04-01", description="Fecha de la factura"),
@@ -105,7 +113,7 @@ class FacturaController extends AbstractController
      */
     public function findAll(Request $request,FacturaRepository $repository): JsonResponse
     {
-        $data = $repository->getAll();
+        $data = $repository->getAll($this->params->get('urlapi'));
         // Verifica qué datos estás obteniendo
         if (empty($data)) {
             return new JsonResponse([
@@ -139,8 +147,8 @@ class FacturaController extends AbstractController
      *         required=true,
      *         description="Datos de la factura a actualizar",
      *         @OA\JsonContent(
-     *             required={"cliente", "local", "numero", "fecha", "hora", "monto", "tasa"},
-     *             @OA\Property(property="cliente", type="integer", example=1, description="ID del cliente"),
+     *             required={"user", "local", "numero", "fecha", "hora", "monto", "tasa"},
+     *             @OA\Property(property="user", type="integer", example=1, description="ID del usuario"),
      *             @OA\Property(property="local", type="integer", example=1, description="ID del local"),
      *             @OA\Property(property="numero", type="string", example="01234567", description="Numero de la factura"),
      *             @OA\Property(property="fecha", type="date", example="2022-04-01", description="Fecha de la factura"),

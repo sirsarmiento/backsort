@@ -984,10 +984,10 @@ class UserController extends AbstractController
          *    description="email",
          *    @OA\JsonContent(
          *       required={"email"},
-         *       @OA\Property(property="email", type="string", format="string", example="baezgregoric@gmail.com"),
-         *       @OA\Property(property="nombre", type="string", format="string", example="Luis Mariano Baez G"),
-         *       @OA\Property(property="asunto", type="string", format="string", example="carta de parfar"),
-         *       @OA\Property(property="telefono", type="string", format="string", example="04125950736"),
+         *       @OA\Property(property="email", type="string", format="string", example="sirsarmiento@gmail.com"),
+         *       @OA\Property(property="nombre", type="string", format="string", example="Sir Oscar Sarmiento"),
+         *       @OA\Property(property="asunto", type="string", format="string", example="Carta de parfar"),
+         *       @OA\Property(property="telefono", type="string", format="string", example="04142781730"),
          *       @OA\Property(property="mensaje", type="string", format="string", example="el correo parfar para soporte"),
          *    ),
          * ),
@@ -1007,8 +1007,8 @@ class UserController extends AbstractController
             $em =$this->getDoctrine()->getManager();
             $data = json_decode($request->getContent(),true);
             if ($data) {
-                 $urlFront =$this->params->get('urlfrom');
-                 $correo->enviocorreoparfarcontactame($data,"Datos de contacto"."<br><br>"."Nombre y Apellido: ".utf8_decode($data["nombre"])."<br><br>"."Email: ".$data["email"]."<br><br>"."Tlf.: ".$data["telefono"]."<br><br>"."Mensaje: ".utf8_decode($data["mensaje"]) ."<br><br>"."Quedo atento(a). "."<br><br>"."Saludos. ");
+                $urlFront =$this->params->get('urlfrom');
+                $correo->enviocorreoparfarcontactame($data,"Datos de contacto"."<br><br>"."Nombre y Apellido: ".utf8_decode($data["nombre"])."<br><br>"."Email: ".$data["email"]."<br><br>"."Tlf.: ".$data["telefono"]."<br><br>"."Mensaje: ".utf8_decode($data["mensaje"]) ."<br><br>"."Quedo atento(a). "."<br><br>"."Saludos. ");
                 return new JsonResponse(['msg'=>'Correo Enviado'],200);
             }else{
                 return new JsonResponse(['msg'=>'Error del Data'],500);

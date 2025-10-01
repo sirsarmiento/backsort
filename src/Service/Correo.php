@@ -12,11 +12,11 @@ class Correo
  
     public function enviocorreo($correodestino,$htmlcuerp){
         $destinatario = $correodestino["email"]; 
-            $asunto = "Notificaciones del Sistema GIEP"; 
+            $asunto = "Notificaciones del Sistema PAFAR"; 
             $cuerpo = ' 
             <html> 
             <head> 
-            <title>Sistema GIEP</title> 
+            <title>Sistema PAFAR</title> 
             </head> 
             <body> 
             <p> 

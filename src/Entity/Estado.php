@@ -71,16 +71,10 @@ class Estado
      */
     private $idempresa;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Cliente::class, mappedBy="estado")
-     */
-    private $clientes;
-
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->ciudads = new ArrayCollection();
-        $this->clientes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -240,36 +234,6 @@ class Estado
     public function setIdempresa(?Empresa $idempresa): self
     {
         $this->idempresa = $idempresa;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Cliente[]
-     */
-    public function getClientes(): Collection
-    {
-        return $this->clientes;
-    }
-
-    public function addCliente(Cliente $cliente): self
-    {
-        if (!$this->clientes->contains($cliente)) {
-            $this->clientes[] = $cliente;
-            $cliente->setEstado($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCliente(Cliente $cliente): self
-    {
-        if ($this->clientes->removeElement($cliente)) {
-            // set the owning side to null (unless already changed)
-            if ($cliente->getEstado() === $this) {
-                $cliente->setEstado(null);
-            }
-        }
 
         return $this;
     }
