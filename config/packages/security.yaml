@@ -36,6 +36,8 @@ security:
 
     access_control:
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/estado/pais/, roles: IS_AUTHENTICATED_ANONYMOUSLY } 
+        - { path: ^/api/facturas/tickets/total, roles: IS_AUTHENTICATED_ANONYMOUSLY }  
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/reporte,       roles: IS_AUTHENTICATED_ANONYMOUSLY }
 

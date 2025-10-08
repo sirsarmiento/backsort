@@ -113,6 +113,7 @@ class FacturaRepository extends ServiceEntityRepository
                     'montoMin' => $factura->getMontoMin(),
                     'tasa' => $factura->getTasa(),
                     'print' => $factura->getPrint(),
+                    'tickets' => $factura->getTickets(),
                     'cliente' => ($factura->getUser()!=null)?array(
                         "id"=>$factura->getUser()->getId(),
                         "tipoDocumentoIdentidad"=>$factura->getUser()->getTipoDocumentoIdentidad(),
@@ -138,6 +139,23 @@ class FacturaRepository extends ServiceEntityRepository
             return new JsonResponse([
                 'message' => 'Error al obtener los facturaes: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function getTotalTicketsWithCount(): array
+    {
+        try {
+            $query = $this->createQueryBuilder('f')
+                ->select('SUM(f.tickets) as totalTickets', 'COUNT(f.id) as totalFacturas')
+                ->getQuery();
+            
+            return $query->getSingleResult();
+            
+        } catch (\Exception $e) {
+            return [
+                'totalTickets' => 0,
+                'totalFacturas' => 0
+            ];
         }
     }
 
@@ -196,5 +214,47 @@ class FacturaRepository extends ServiceEntityRepository
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Update Print Factura.
+     */
+    public function putPrint($data,$id,$validator,$helper): JsonResponse  
+    {
+        $entityManager = $this->getEntityManager();
+        $entity =$entityManager->getRepository(Factura::class)->find($id);
+
+        if (!$entity) {
+            return new JsonResponse(['msg'=>'No existen Registros con el id: '.$id],404);  
+        }
+
+        // Validar que print sea un número entero
+        $printValue = $data['print'];
+        if (!is_int($printValue) || $printValue < 0) {
+            return new JsonResponse([
+                'message' => 'El campo print debe ser un número entero positivo'
+            ], 422);
+        }
+
+        // Actualizar solo la propiedad print
+        $entity->setPrint($printValue);
+
+        $entity=$helper->setParametersToEntity($entity,$data);
+        $currentUser =$entityManager->getRepository(User::class)->find($this->security->getUser()->getId());
+        $entity->setUpdateBy($currentUser->getUserName());
+        $entity->setUpdateAt(new \DateTime());
+
+        $errors = $validator->validate($entity);
+        if($errors->count() > 0){
+            foreach ($errors as $violation) {
+                $messages[$violation->getPropertyPath()][] = $violation->getMessage();
+            }
+            return new JsonResponse($messages,500);
+        }else{
+            $entityManager->persist($entity);
+            $entityManager->flush();
+            return new JsonResponse(['msg'=>'Registro Actualizado: '.$entity->getId()],200);
+        }
+
     }
 }

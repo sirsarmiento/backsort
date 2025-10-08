@@ -87,6 +87,11 @@ class Factura
      */
     private $user;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $tickets;
+
 
     public function __construct()
     {
@@ -251,6 +256,18 @@ class Factura
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getTickets(): ?int
+    {
+        return $this->tickets;
+    }
+
+    public function setTickets(int $tickets): self
+    {
+        $this->tickets = $tickets;
 
         return $this;
     }

@@ -130,6 +130,60 @@ class FacturaController extends AbstractController
     }
 
     /**
+     * @Route("api/facturas/tickets/total", methods={"GET"})
+     * @OA\Get(
+     *     summary="Obtener el total de tickets",
+     *     description="Retorna la suma total de todos los tickets generados",
+     *     operationId="getTotalTickets",
+     *     tags={"Facturas"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Total de tickets obtenido exitosamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Total de tickets obtenido exitosamente"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="totalTickets", type="integer", example=12345, description="Suma total de todos los tickets"),
+     *                 @OA\Property(property="totalFacturas", type="integer", example=100, description="Cantidad total de facturas procesadas")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error interno del servidor"
+     *     )
+     * )
+     * @Security(name="Bearer")
+     */
+    public function TotalTickets(FacturaRepository $repository): JsonResponse
+    {
+        try {
+
+            $ticketData = $repository->getTotalTicketsWithCount();
+            
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Total de tickets obtenido exitosamente',
+                'data' => [
+                    'totalTickets' => (int) $ticketData['totalTickets'],
+                    'totalFacturas' => (int) $ticketData['totalFacturas']
+                ]
+            ], 200);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Error al obtener el total de tickets: ' . $e->getMessage(),
+                'data' => [
+                    'totalTickets' => 0,
+                    'totalFacturas' => 0
+                ]
+            ], 500);
+        }
+    }
+
+    /**
      * @Route("/api/factura/{id}", methods={"PUT"})
      * @OA\Put(
      *     summary="Actualizar una factura existente",
@@ -210,6 +264,72 @@ class FacturaController extends AbstractController
                 'message' => 'Error del Servidor',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * @Route("/api/factura/{id}/print", methods={"PUT"})
+     * @OA\Put(
+     *     summary="Actualizar impresión de factura",
+     *     description="Actualiza el contador de impresión de una factura",
+     *     operationId="updateFacturaPrint",
+     *     tags={"Facturas"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID de la factura",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Datos para actualizar la impresión",
+     *         @OA\JsonContent(
+     *             required={"print"},
+     *             @OA\Property(property="print", type="integer", example="1", description="Contador de impresiones")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Factura actualizada exitosamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Factura actualizada exitosamente"),
+     *             @OA\Property(property="factura", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Factura no encontrada",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Factura no encontrada")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Datos de entrada inválidos",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error de validación"),
+     *             @OA\Property(property="errors", type="array", @OA\Items(type="string"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error del servidor",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Error del servidor")
+     *         )
+     *     )
+     * )
+     */
+    public function updatePrint($id, Request $request, ValidatorInterface $validator, Helper $helper, FacturaRepository $repository): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(),true);
+            $em =$this->getDoctrine()->getManager();
+            $repository = $this->getDoctrine()->getRepository(Factura::class);
+            return $repository->putPrint($data,$id,$validator,$helper); 
+        } catch (Exception $e) {
+            return new JsonResponse(['msg'=>'Error del Servidor'],500);
         }
     }
 }
