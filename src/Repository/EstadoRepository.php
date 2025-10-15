@@ -156,7 +156,7 @@ class EstadoRepository extends ServiceEntityRepository
             $entity->setCreateBy($currentUser->getUserName());
             $entity->setCreateBy($currentUser->getUserName());
 
-            //$entity->setIdStatus($entityManager->getRepository(Status::class)->find(1)); 
+            $entity->setIdStatus($entityManager->getRepository(Status::class)->find(1)); 
             $empresa= $entityManager->getRepository(Empresa::class)->find($this->security->getUser()->getIdempresa());
             if($empresa)
                 $entity->setIdempresa($empresa);
@@ -196,35 +196,4 @@ class EstadoRepository extends ServiceEntityRepository
         }
 
     }
-
-
-
-    // /**
-    //  * @return Estado[] Returns an array of Estado objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('e.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Estado
-    {
-        return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

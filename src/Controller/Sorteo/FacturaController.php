@@ -19,6 +19,8 @@ use App\Service\Helper;
 use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
+use  App\Service\Correo;
+
 class FacturaController extends AbstractController
 {
     private $params;
@@ -331,5 +333,98 @@ class FacturaController extends AbstractController
         } catch (Exception $e) {
             return new JsonResponse(['msg'=>'Error del Servidor'],500);
         }
+    }
+
+    /**
+    * @Route("/api/validate/email", methods={"POST"})
+    * @OA\Post(
+        * summary="Validate Email",
+        * description="Validate Email",
+        * operationId="ValidateEmail",
+        * tags={"Facturas"},
+        * @OA\RequestBody(
+        *    required=true,
+        *    description="email",
+        *    @OA\JsonContent(
+        *       required={"email"},
+        *       @OA\Property(property="email", type="string", format="string", example="baezgregoric@gmail.com"),
+        *    ),
+        * ),
+        * @OA\Response(
+        *    response=422,
+        *    description="Wrong credentials response",
+        *    @OA\JsonContent(
+        *       @OA\Property(property="message", type="string", example="Sorry, wrong email address or password. Please try again")
+        *        )
+        *     )
+        * )
+    */
+   public function ValidateEmail(Request $request, Correo $correo): JsonResponse
+    {   
+        try {
+            $data = json_decode($request->getContent(), true);
+            
+            if (!$data || !isset($data['email']) || empty(trim($data['email']))) {
+                return new JsonResponse(['msg' => 'Email es requerido'], 400);
+            }
+            
+            if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                return new JsonResponse(['msg' => 'Email inválido'], 400);
+            }
+            
+            $urlFront = $this->params->get('urlfrom');
+            $correo->validateEmail($data, $urlFront);
+            
+            return new JsonResponse(['success' => true, 'msg' => 'Email enviado correctamente']);
+            
+        } catch (HttpException $e) {
+            return new JsonResponse(['msg' => 'Error del Servidor'], 500);
+        } catch (\Exception $e) {
+            return new JsonResponse(['msg' => 'Error interno del servidor'], 500);
+        }
+    }
+
+    /**
+     *  Get bills by email
+     * @Route("/api/factura/{email}", methods={"GET"})
+     * @OA\Get(
+     *     summary="Obtener todos las facturas por email",
+     *     description="Retorna una lista de todos las facturas por un cliente",
+     *     operationId="getBillsByEmail",
+     *     tags={"Facturas"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de facturas obtenida exitosamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Facturas obtenidos exitosamente"),
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="user", type="string", example=1, description="Nombre del usuario"),
+     *                     @OA\Property(property="local", type="string", example=1, description="Nombre del local"),
+     *                     @OA\Property(property="numero", type="string", example="01234567", description="Numero de la factura"),
+     *                     @OA\Property(property="fecha", type="date", example="2022-04-01", description="Fecha de la factura"),
+     *                     @OA\Property(property="hora", type="string", example="09:10", description="Hora de la factura"),
+     *                     @OA\Property(property="monto", type="number", example="1540.10", description="Monto de la factura"),
+     *                     @OA\Property(property="tasa", type="number", example="171.30", description="Tasa de la factura"),
+     *                 )
+     *             ),
+     *             @OA\Property(property="count", type="integer", example=5)
+     *         )
+     *     )
+     * )
+     * @Security(name="Bearer")
+     */
+    public function findBillsByEmail($email,FacturaRepository $repository): JsonResponse
+    {
+        $data = $repository
+        ->findBillsByEmail($email);
+        if (!$data) {
+            return new JsonResponse(['msg'=>'No existen Registros'],404);  
+        }   
+         return new JsonResponse($data,200);  
     }
 }

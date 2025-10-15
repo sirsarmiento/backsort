@@ -33,7 +33,7 @@ class Factura
     private $fecha;
 
     /**
-     * @ORM\Column(type="string", length=8)
+     * @ORM\Column(type="string", length=15)
      */
     private $hora;
 

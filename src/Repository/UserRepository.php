@@ -93,12 +93,28 @@ class UserRepository extends ServiceEntityRepository
             $entity->setEstado($entityEstado);
             $entity->setCiudad($entityCiudad);
             $entity->setSexo($data["sexo"]);
-            $entity->setDireccion($data["direccion"]);         
-            $currentUser =$entityManager->getRepository(User::class)->find($this->security->getUser()->getId());
-            $entity->setCreateBy($currentUser->getUserName());
-            $entity->setRoles(json_encode($data["roles"]));
+            $entity->setDireccion($data["direccion"]); 
 
-            $empresa= $entityManager->getRepository(Empresa::class)->find($this->security->getUser()->getIdempresa());
+            // $currentUser =$entityManager->getRepository(User::class)->find($this->security->getUser()->getId());
+            // $entity->setCreateBy($currentUser->getUserName());
+
+            //Eliminar 2 comentarios de arriba cuando termine pruebas de lineas de abajo.
+
+            // Se agregaron estas 11 lineas por el caso de uso que el cliente se registrar en user sin estar logueado.
+            $userId = $this->security->getUser();
+
+            if ($userId === null) {
+                $entity->setCreateBy('app-register');
+                $empresa = $entityManager->getRepository(Empresa::class)->find(1);
+            } else {
+                $userId = $this->security->getUser()->getId();
+                $currentUser = $entityManager->getRepository(User::class)->find($userId);
+                $userName = $currentUser ? $currentUser->getUserName() : 'app-register';
+                $entity->setCreateBy($userName);
+                $empresa = $entityManager->getRepository(Empresa::class)->find($this->security->getUser()->getIdempresa());
+            } //Fin lineas nuevas Sir
+
+            $entity->setRoles(json_encode($data["roles"]));
 
             if($empresa)
                 $entity->setIdempresa($empresa);
@@ -109,15 +125,31 @@ class UserRepository extends ServiceEntityRepository
                 $entityTelefono=new Telefono();
                 $entityStatus = $entityManager->getRepository(Status::class)->findOneById(1);          
                 $entityTelefono->setIdUser($entity);
-                $entityTelefono->setNumero($value["numero"]);   
-                $entityTelefono->setCreateBy($currentUser->getUserName());
+                $entityTelefono->setNumero($value["numero"]); 
+                
+                // Al inicio de tu función/clase, asegúrate de que la variable existe
+                $currentUser = $currentUser ?? null;
+
+                // Luego puedes usar tranquilamente
+                $createBy = $currentUser !== null ? $currentUser->getUserName() : 'system'; //Sir Agregue validación para los casos donde no hay usuario logueado porque se registra desde el app de registro de cliente 
+
+                $entityTelefono->setCreateBy($createBy);
+
                 $entityTelefono->setIdStatus($entityStatus); 
                 $errors = $validator->validate($entityTelefono);
                 if($errors->count() > 0){
                     $errorsString = (string) $errors;
                     return new JsonResponse(['msg'=>$errorsString],500);
                 }else{
-                    $empresa= $entityManager->getRepository(Empresa::class)->find($this->security->getUser()->getIdempresa());
+                    $user = $this->security->getUser();
+                    $idEmpresa = 1; // Valor por defecto
+
+                    if ($user !== null && method_exists($user, 'getIdempresa')) {
+                        $idEmpresa = $user->getIdempresa();
+                    }
+
+                    $empresa = $entityManager->getRepository(Empresa::class)->find($idEmpresa);
+                    
                     if($empresa)
                        $entityTelefono->setIdempresa($empresa);
                     $entityManager->persist($entityTelefono);
@@ -642,6 +674,29 @@ class UserRepository extends ServiceEntityRepository
         }
 
     }    
+
+    /**
+     * Update Cedula User.
+     */
+    public function putCedula(User $user, string $foto, $validator): JsonResponse  
+    {
+        $entityManager = $this->getEntityManager();
+        
+        // Usar el usuario que se pasa como parámetro
+        $user->setUpdateBy($user->getUserName());
+        $user->setUpdateAt(new \DateTime());
+        $user->setFoto($foto);
+        
+        // Validar antes de guardar
+        $errors = $validator->validate($user);
+        if ($errors->count() > 0) {
+            $errorsString = (string) $errors;
+            return new JsonResponse(['msg' => $errorsString], 422);
+        }
+        
+        $entityManager->flush();
+        return new JsonResponse(['msg' => 'Registro Actualizado: ' . $user->getUsername()], 200);
+    }
 
 
         /**

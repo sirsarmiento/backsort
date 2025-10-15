@@ -55,6 +55,20 @@ class FacturaRepository extends ServiceEntityRepository
                 $entity->setMontoMin((string) $montoMin);
             }
 
+            // Validar que el número de factura no exista para el mismo local
+            if (isset($data['numero']) && isset($data['local'])) {
+                $existingFactura = $this->createQueryBuilder('f')
+                    ->where('f.numero = :numero')
+                    ->andWhere('f.local = :local')
+                    ->setParameter('numero', $data['numero'])
+                    ->setParameter('local', $data['local'])
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                if ($existingFactura) {
+                     return new JsonResponse(['msg'=>'Ya existe una factura con este número para el local seleccionado'],409);;
+                }
+            }
+
             // Validar entidad principal
             $errors = $validator->validate($entity);
             if ($errors->count() > 0) {
@@ -84,7 +98,7 @@ class FacturaRepository extends ServiceEntityRepository
             $entityManager->flush();
             
             return new JsonResponse([
-                'msg' => 'factura creado exitosamente',
+                'msg' => 'Factura creada exitosamente',
                 'id' => $entity->getId()
             ], 201);
             
@@ -176,6 +190,23 @@ class FacturaRepository extends ServiceEntityRepository
 
             // Actualizar entidad principal
             $factura = $helper->setParametersToEntity($factura, $data);
+            // Convertir montos al formato correcto para la base de datos. Los montos mayores a 1000 me estaba guardando el primer numero ejemplo 1.500,00 me guardaba 1
+            if (isset($data['monto'])) {
+                // Asegurar que el monto sea un float/string numérico
+                $monto = is_numeric($data['monto']) ? $data['monto'] : floatval(str_replace(',', '.', str_replace('.', '', $data['monto'])));
+                $factura->setMonto((string) $monto);
+            }
+            
+            if (isset($data['tasa'])) {
+                $tasa = is_numeric($data['tasa']) ? $data['tasa'] : floatval(str_replace(',', '.', str_replace('.', '', $data['tasa'])));
+                $factura->setTasa((string) $tasa);
+            }
+
+            if (isset($data['montoMin'])) {
+                // Asegurar que el monto sea un float/string numérico
+                $montoMin = is_numeric($data['montoMin']) ? $data['montoMin'] : floatval(str_replace(',', '.', str_replace('.', '', $data['montoMin'])));
+                $factura->setMontoMin((string) $montoMin);
+            }
             
             // Validar entidad principal
             $errors = $validator->validate($factura);
@@ -256,5 +287,60 @@ class FacturaRepository extends ServiceEntityRepository
             return new JsonResponse(['msg'=>'Registro Actualizado: '.$entity->getId()],200);
         }
 
+    }
+
+    public function findBillsByEmail($email): array 
+    {
+        try {
+            $qb = $this->createQueryBuilder('f')
+                ->leftJoin('f.user', 'u')
+                ->leftJoin('f.local', 'l')
+                ->where('u.email = :email')
+                ->setParameter('email', $email)
+                ->orderBy('f.id', 'DESC');
+
+            $facturas = $qb->getQuery()->getResult();
+
+            $result = [];
+            $urlPhotoCI = ''; // Define según tu configuración
+
+            foreach ($facturas as $factura) {
+                $user = $factura->getUser();
+                $result[] = [
+                    'id' => $factura->getId(),
+                    'numero' => $factura->getNumero(),
+                    'fecha' => $factura->getFecha()->format("Y-m-d"),
+                    'hora' => $factura->getHora(),
+                    'monto' => $factura->getMonto(),
+                    'montoMin' => $factura->getMontoMin(),
+                    'tasa' => $factura->getTasa(),
+                    'print' => $factura->getPrint(),
+                    'tickets' => $factura->getTickets(),
+                    'cliente' => ($user != null) ? array(
+                        "id" => $user->getId(),
+                        "tipoDocumentoIdentidad" => $user->getTipoDocumentoIdentidad(),
+                        "nroDocumentoIdentidad" => $user->getNumeroDocumento(),
+                        "nombreCompleto" => trim(
+                            ($user->getPrimerNombre() ?? '') . ' ' .
+                            ($user->getSegundoNombre() ?? '') . ' ' .
+                            ($user->getPrimerApellido() ?? '') . ' ' .
+                            ($user->getSegundoApellido() ?? '')
+                        ),
+                        "fotoCedula" => ($user->getFoto()) ? $urlPhotoCI . $user->getFoto() : null,
+                    ) : [],
+                    'local' => ($factura->getLocal() != null) ? array(
+                        "id" => $factura->getLocal()->getId(),
+                        "nombre" => $factura->getLocal()->getNombre()
+                    ) : [],
+                ];
+            }
+
+            return $result;
+            
+        } catch (\Exception $e) {
+            return [
+                'message' => 'Error al obtener las facturas: ' . $e->getMessage()
+            ];
+        }
     }
 }

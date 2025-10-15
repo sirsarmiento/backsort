@@ -27,7 +27,7 @@ class Estado
     private $nombre;
 
     /**
-     * @ORM\ManyToOne(targetEntity=status::class)
+     * @ORM\ManyToOne(targetEntity=Status::class)
      */
     private $status;
 

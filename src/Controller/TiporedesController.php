@@ -21,34 +21,34 @@ use Symfony\Component\Validator\Constraints\Json;
 
 class TiporedesController extends AbstractController
 {
-/**
-        *  Get Tipo Redes by Tipo Redes Id.
-        * @Route("/api/tiporedes/List", methods={"GET"})
-        * @OA\Post(
-         * summary="TipoRedes List",
-         * description="TipoRedes List",
-         * operationId="TipoRedeslist",
-         * tags={"Tipo Redes"},
-         * @OA\RequestBody(
-         *    required=true,
-         *    description="parametro",
-         *    @OA\JsonContent(
-         *       required={"page"},
-         *       @OA\Property(property="page", type="integer", format="integer", example="1"),
-         *       @OA\Property(property="rowByPage", type="integer", format="integer", example="1"),
-         *       @OA\Property(property="word", type="integer", format="integer", example="1"),
-         *    ),
-         * ),
-         * @OA\Response(
-         *    response=422,
-         *    description="Wrong credentials response",
-         *    @OA\JsonContent(
-         *       @OA\Property(property="message", type="string", example="Sorry, wrong email address or password. Please try again")
-         *        )
-         *     )
-         * )
-         * @OA\Tag(name="Tipo Redes")
-         * @Security(name="Bearer")
+    /**
+    *  Get Tipo Redes by Tipo Redes Id.
+    * @Route("/api/tiporedes/List", methods={"GET"})
+    * @OA\Post(
+        * summary="TipoRedes List",
+        * description="TipoRedes List",
+        * operationId="TipoRedeslist",
+        * tags={"Tipo Redes"},
+        * @OA\RequestBody(
+        *    required=true,
+        *    description="parametro",
+        *    @OA\JsonContent(
+        *       required={"page"},
+        *       @OA\Property(property="page", type="integer", format="integer", example="1"),
+        *       @OA\Property(property="rowByPage", type="integer", format="integer", example="1"),
+        *       @OA\Property(property="word", type="integer", format="integer", example="1"),
+        *    ),
+        * ),
+        * @OA\Response(
+        *    response=422,
+        *    description="Wrong credentials response",
+        *    @OA\JsonContent(
+        *       @OA\Property(property="message", type="string", example="Sorry, wrong email address or password. Please try again")
+        *        )
+        *     )
+        * )
+        * @OA\Tag(name="Tipo Redes")
+        * @Security(name="Bearer")
     */  
 
     public function findList(Request $request,TiporedesRepository $tiporedesRepository): JsonResponse

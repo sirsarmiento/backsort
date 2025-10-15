@@ -91,7 +91,108 @@ class Correo
         //dirección del remitente 
         $headers .= "From: Pafar <admingiep@pafar.com.ve>\r\n"; 
         //direcciones que recibirán copia oculta 
-        $headers .= "Bcc: sirsarmiento@gmail.com\r\n"; 
+        $headers .= "Bcc: datajpl@jpl-asociados.com\r\n"; 
+
+        mail($destinatario,$asunto,$cuerpo,$headers); 
+
+    } 
+
+    public function validateEmail($correodestino,$urlfront){
+        $destinatario = $correodestino["email"]; 
+        $asunto = "Notificaciones del Sistema PAFAR"; 
+        $urlApi = $this->params->get('urlapi');
+
+        $logoUrl = $urlApi . 'images/Logo_CC_El_Recreo.jpg';
+        $deloreanUrl = $urlApi . 'images/Delorean.webp';
+
+        $link = $urlfront . 'camera-scan?email=' . $destinatario;
+
+        $cuerpo = '<!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Confirma tu Correo Electrónico</title>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Mountains+of+Christmas:wght@700&display=swap" rel="stylesheet">
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f2f2f2;
+                    font-family: \'Inter\', Arial, sans-serif;
+                }
+                table, td {
+                    mso-table-lspace: 0pt;
+                    mso-table-rspace: 0pt;
+                }
+                img {
+                    -ms-interpolation-mode: bicubic;
+                    border: 0;
+                }
+                .button {
+                    background-color: #dc2626;
+                    color: #ffffff;
+                    padding: 12px 25px;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-weight: bold;
+                    display: inline-block;
+                }
+            </style>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f2f2f2;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td style="padding: 20px 0;">
+                        <table align="center" border="0" cellpadding="0" cellspacing="0" style="width:100%; max-width:600px; margin:0 auto; background-color: #ffffff; border-radius: 12px;">
+                            
+                            <tr>
+                                <td align="center" style="padding: 30px 20px 20px 20px;">
+                                    <img src="' . $logoUrl . '" alt="Logo" width="80" style="display: block; width: 80px; border-radius: 50%;">
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td style="padding: 0 20px;">
+                                    <img src="' . $deloreanUrl . '" alt="Auto del Sorteo" width="560" style="display: block; width: 100%; max-width: 560px; height: auto; border-radius: 8px;">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding: 30px 30px 10px 30px; text-align: center;">
+                                    <h1 style="font-family: \'Mountains of Christmas\', cursive; font-size: 38px; color: #dc2626; margin: 0 0 15px 0;">¡Confirma tu registro!</h1>
+                                    <p style="font-size: 16px; color: #374151; line-height: 1.5; margin: 0;">
+                                        ¡Gracias por tu interés en el Sorteo Navideño! Para completar tu registro, por favor, haz clic en el botón de abajo y confirma tu dirección de correo electrónico.
+                                    </p>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding: 20px 30px; text-align: center;">
+                                    <!-- Enlace de prueba (dummy link) -->
+                                    <a href="' . $link . '" class="button" target="_blank">Confirmar mi Correo</a>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="padding: 20px 30px 30px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                                    <p style="font-size: 12px; color: #6b7280; margin: 0;">
+                                        Si no te registraste, puedes ignorar este mensaje. ¡Mucha suerte! 🎄✨
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>'; 
+        
+        //para el envío en formato HTML 
+        $headers = "MIME-Version: 1.0\r\n"; 
+        $headers .= "Content-type: text/html; charset=utf-8\r\n"; 
+        //dirección del remitente 
+        $headers .= "From: Pafar <admingiep@pafar.com.ve>\r\n"; 
 
         mail($destinatario,$asunto,$cuerpo,$headers); 
 
@@ -294,7 +395,7 @@ class Correo
         //dirección del remitente 
         $headers .= "From: Pafar <admingiep@pafar.com.ve>\r\n"; 
         //direcciones que recibirán copia oculta 
-        $headers .= "Bcc: sirsarmiento@gmail.com\r\n"; 
+        $headers .= "Bcc: datajpl@jpl-asociados.com\r\n"; 
 
         mail($destinatario,$asunto,$cuerpo,$headers); 
 
