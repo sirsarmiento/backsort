@@ -41,6 +41,7 @@ security:
         - { path: ^/api/estado/pais/, roles: IS_AUTHENTICATED_ANONYMOUSLY } 
         - { path: ^/api/facturas/tickets/total, roles: IS_AUTHENTICATED_ANONYMOUSLY }  
         - { path: ^/api/validate/email, roles: IS_AUTHENTICATED_ANONYMOUSLY }  
+        - { path: ^/api/recoverpass/email, roles: IS_AUTHENTICATED_ANONYMOUSLY }  
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
         - { path: ^/reporte,       roles: IS_AUTHENTICATED_ANONYMOUSLY }
 

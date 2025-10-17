@@ -26,6 +26,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserController extends AbstractController
 {
@@ -574,14 +575,9 @@ class UserController extends AbstractController
             $repository = $this->getDoctrine()->getRepository(Token::class);
             $result= json_decode($repository->post($data,$validator,$helper,$user));
             if($result->msg=="Token Creado"){
-                 $urlFront =$this->params->get('urlfrom');
-                /*$email->setHtml("Para realizar el cambio de contraseña haga click en el siguiente enlace:<br><br>"."<a href='".$urlFront."'?token=".$result->token."'>Cambiar Contraseña</a>");
-                $email->setSubject("Cambio de Contraseña del Sistema GIEP");
-                $email->setTo($data);
-                $email->sendMail(); */
+                $urlFront =$this->params->get('urlfrom');
                 $correo->enviocorreo($data,"Para realizar el cambio de contraseña haga click en el siguiente enlace:<br><br>"."<a href='".$urlFront."auth/change-pass/".$result->token."'>Cambiar Contraseña</a>");
 
-//              $this->enviocorreo($data,"Para realizar el cambio de contraseña haga click en el siguiente enlace:<br><br>"."<a href='".$urlFront."auth/change-pass/".$result->token."'>Cambiar Contraseña</a>");
                 return new JsonResponse(['msg'=>'Correo para el cambio de Contraseña Enviado'],200);
             }else{
                 return new JsonResponse($result);
@@ -589,35 +585,6 @@ class UserController extends AbstractController
         } catch (HttpException $e) {
             return new JsonResponse(['msg'=>'Error del Servidor'],500);
         }
-    }
-
-
-
-
-    public function enviocorreo($correodestino,$htmlcuerp){
-        $destinatario = $correodestino["email"]; 
-            $asunto = "Credenciales de Acceso al Sistema GIEP"; 
-            $cuerpo = ' 
-            <html> 
-            <head> 
-            <title>Sistema GIEP</title> 
-            </head> 
-            <body> 
-            <p> 
-            <b>'. $htmlcuerp .'</b>.  
-            </p> 
-            </body> 
-            </html> 
-            '; 
-            //para el envío en formato HTML 
-            $headers = "MIME-Version: 1.0\r\n"; 
-            $headers .= "Content-type: text/html; charset=iso-8859-1\r\n"; 
-            //dirección del remitente 
-            $headers .= "From: Mariano Baez <mariano@pafar.com.ve>\r\n"; 
-            //direcciones que recibirán copia oculta 
-            //$headers .= "Bcc: sirjcbg1@gmail.com\r\n"; 
-            mail($destinatario,$asunto,$cuerpo,$headers); 
-
     }
 
     /**
@@ -1143,6 +1110,126 @@ class UserController extends AbstractController
     {
         $data = $repository->getall();
         return new JsonResponse($data, 200);
+    }
+
+    /**
+     * @Route("/api/recoverpass/email", methods={"POST"})
+     * @OA\Post(
+     *     summary="Password Temporal",
+     *     description="Genera una nueva contraseña temporal y la envía por email",
+     *     operationId="RecoverPass",
+     *     tags={"Users"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Email para recuperación de contraseña",
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email", example="sirsarmiento@gmail.com"),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Contraseña temporal enviada correctamente",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="msg", type="string", example="Contraseña temporal enviada correctamente")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Datos inválidos",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="Email es requerido")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Usuario no encontrado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="Usuario no encontrado")
+     *         )
+     *     )
+     * )
+     */
+    public function TemporaryPass(
+        Request $request, 
+        Correo $correo, 
+        UserRepository $userRepository,
+        UserPasswordEncoderInterface $passwordEncoder
+    ): JsonResponse {   
+        try {
+            $data = json_decode($request->getContent(), true);
+            
+            // Validaciones
+            if (!$data || !isset($data['email']) || empty(trim($data['email']))) {
+                return new JsonResponse(['msg' => 'Email es requerido'], 400);
+            }
+            
+            $email = trim($data['email']);
+            
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return new JsonResponse(['msg' => 'Email inválido'], 400);
+            }
+
+            // Verificar si el usuario existe
+            $user = $userRepository->findOneBy(['email' => $email]);
+            
+        // Respuesta genérica para ambos casos (seguridad)
+            $response = [
+                'success' => true, 
+                'msg' => 'Si el email existe en nuestro sistema, recibirás una contraseña temporal'
+            ];
+
+
+            // Solo procesar si el usuario existe
+             if ($user) {
+                // Generar contraseña temporal
+                $temporaryPassword = $this->generateTemporaryPassword();
+                
+                // Actualizar contraseña del usuario
+                $user->setPassword($passwordEncoder->encodePassword($user, $temporaryPassword));
+                
+                // Actualizar clave temporal del usuario
+                $entityManager = $this->getDoctrine()->getManager();
+                $entityManager->persist($user);
+                $entityManager->flush();
+
+                //Enviar email con la contraseña temporal SOLO si el usuario existe
+                $correo->temporaryPass(
+                    $data,
+                    "Tu contraseña nueva es: <strong>" . htmlspecialchars($temporaryPassword) . "</strong><br><br>" .
+                    "Por seguridad, recomendamos cambiarla inmediatamente después de iniciar sesión."
+                );
+            }
+
+        
+            // Siempre devolver la misma respuesta
+            return new JsonResponse($response);
+            
+        } catch (\Exception $e) {
+            // Log del error
+            error_log("Error en recuperación de contraseña: " . $e->getMessage());
+            
+            return new JsonResponse([
+                'msg' => 'Error interno del servidor'
+            ], 500);
+        }
+    }
+
+    /**
+     * Genera una contraseña temporal segura
+     */
+    private function generateTemporaryPassword(): string
+    {
+        $length = 12;
+        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+        $password = '';
+        
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+        
+        return $password;
     }
 
 }

@@ -4,6 +4,7 @@ namespace App\Controller\Sorteo;
 
 use App\Entity\Sorteo\Factura;
 use App\Repository\Sorteo\FacturaRepository;
+use App\Repository\UserRepository;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +19,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Service\Helper;
 use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
 use  App\Service\Correo;
 
 class FacturaController extends AbstractController
@@ -359,7 +359,7 @@ class FacturaController extends AbstractController
         *     )
         * )
     */
-   public function ValidateEmail(Request $request, Correo $correo): JsonResponse
+   public function ValidateEmail(Request $request, Correo $correo, UserRepository $userRepository): JsonResponse
     {   
         try {
             $data = json_decode($request->getContent(), true);
@@ -371,11 +371,26 @@ class FacturaController extends AbstractController
             if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
                 return new JsonResponse(['msg' => 'Email inválido'], 400);
             }
+
+            // Verificar si el email ya está registrado
+            $existingUser = $userRepository->findOneBy(['email' => trim($data['email'])]);
+  
+            if ($existingUser) {
+                return new JsonResponse([
+                    'success' => false,
+                    'msg' => 'Este email ya se encuentra registrado en nuestro sistema',
+                    'email_registered' => true
+                ], 200);
+            }
             
             $urlFront = $this->params->get('urlfrom');
             $correo->validateEmail($data, $urlFront);
             
-            return new JsonResponse(['success' => true, 'msg' => 'Email enviado correctamente']);
+            return new JsonResponse([
+                'success' => true, 
+                'msg' => 'Email enviado correctamente',
+                'email_registered' => true
+            ]);
             
         } catch (HttpException $e) {
             return new JsonResponse(['msg' => 'Error del Servidor'], 500);
