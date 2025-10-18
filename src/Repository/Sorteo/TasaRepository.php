@@ -89,7 +89,8 @@ class TasaRepository extends ServiceEntityRepository
             $result[] = [
                 'id' => $tasa->getId(),
                 'monto' => $tasa->getMonto(),
-                'fecha' => $tasa->getCreateAt()->format("Y-m-d")
+                'fecha' => $tasa->getFecha()->format("Y-m-d"),
+                'creadoEl' => $tasa->getCreateAt()->format("Y-m-d")
             ];
         }
 
