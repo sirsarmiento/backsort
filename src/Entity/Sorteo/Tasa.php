@@ -42,6 +42,11 @@ class Tasa
      */
     private $updateAt;
 
+    /**
+     * @ORM\Column(type="date", nullable=true)
+     */
+    private $Fecha;
+
     public function __construct()
     {
         $this->createAt = new \DateTime();
@@ -109,6 +114,18 @@ class Tasa
     public function setUpdateAt(?\DateTimeInterface $updateAt): self
     {
         $this->updateAt = $updateAt;
+
+        return $this;
+    }
+
+    public function getFecha(): ?\DateTimeInterface
+    {
+        return $this->Fecha;
+    }
+
+    public function setFecha(\DateTimeInterface $Fecha): self
+    {
+        $this->Fecha = $Fecha;
 
         return $this;
     }
