@@ -32,7 +32,8 @@ class TasaController extends AbstractController
      *         description="Datos de la tasa",
      *         @OA\JsonContent(
      *             required={"monto"},
-     *             @OA\Property(property="monto", type="number", format="float", example=15.50, description="Monto de la tasa")
+     *             @OA\Property(property="monto", type="number", format="float", example=15.50, description="Monto de la tasa"),
+     *             @OA\Property(property="fecha", type="date", example="2022-04-01", description="Fecha de la tasa")
      *         )
      *     ),
      *     @OA\Response(

@@ -45,7 +45,7 @@ class Tasa
     /**
      * @ORM\Column(type="date", nullable=true)
      */
-    private $Fecha;
+    private $fecha;
 
     public function __construct()
     {
@@ -120,12 +120,12 @@ class Tasa
 
     public function getFecha(): ?\DateTimeInterface
     {
-        return $this->Fecha;
+        return $this->fecha;
     }
 
-    public function setFecha(\DateTimeInterface $Fecha): self
+    public function setFecha(\DateTimeInterface $fecha): self
     {
-        $this->Fecha = $Fecha;
+        $this->fecha = $fecha;
 
         return $this;
     }
