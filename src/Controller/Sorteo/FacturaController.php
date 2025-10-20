@@ -20,6 +20,7 @@ use App\Service\Helper;
 use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use  App\Service\Correo;
+use App\Service\FileUploader;
 
 class FacturaController extends AbstractController
 {
@@ -115,7 +116,7 @@ class FacturaController extends AbstractController
      */
     public function findAll(Request $request,FacturaRepository $repository): JsonResponse
     {
-        $data = $repository->getAll($this->params->get('urlapi'));
+        $data = $repository->getAll($this->params->get('urlapilocal')); // Nube urlApi
         // Verifica qué datos estás obteniendo
         if (empty($data)) {
             return new JsonResponse([
@@ -436,10 +437,86 @@ class FacturaController extends AbstractController
     public function findBillsByEmail($email,FacturaRepository $repository): JsonResponse
     {
         $data = $repository
-        ->findBillsByEmail($email);
+        ->findBillsByEmail($email, $this->params->get('urlapi')); 
         if (!$data) {
             return new JsonResponse(['msg'=>'No existen Registros'],404);  
         }   
          return new JsonResponse($data,200);  
+    }
+
+    /**
+     * @Route("/api/user/upload/bill/{id}", methods={"POST"})
+     * @OA\Post(
+     *     summary="User upload photobill by ID",
+     *     description="User upload PhotoBill by user ID",
+     *     operationId="useruploadphotobillbyid",
+     *     tags={"Facturas"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="Bill ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     description="photo",
+     *                     property="photo",
+     *                     type="string",
+     *                     format="binary",
+     *                 ),
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Photo uploaded successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="Registro Actualizado")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Bill not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation errors")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="File upload error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="error cargando foto")
+     *         )
+     *     )
+     * )
+     */
+    public function uploadBill(Request $request, int $id, ValidatorInterface $validator, FileUploader $fileUploader, FacturaRepository $repository): JsonResponse
+    {
+        $file = $request->files->get('photo');
+
+        // Buscar usuario por ID en lugar del usuario autenticado
+        $bill = $repository->find($id);
+        
+        if (!$bill) {
+            return new JsonResponse(['message' => 'Bill not found'], 404);
+        }
+
+        if ($file) {
+            $brochureFileName = $fileUploader->upload($file, "facturas/" . $bill->getId());
+            return $repository->putUrlBill($id, $brochureFileName, $validator);
+        } else {
+            return new JsonResponse(['error' => 'error cargando foto'], 409);
+        }
     }
 }

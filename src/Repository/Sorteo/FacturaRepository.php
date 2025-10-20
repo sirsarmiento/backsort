@@ -110,7 +110,7 @@ class FacturaRepository extends ServiceEntityRepository
         }
     }
 
-    public function getAll($urlPhotoCI): array 
+    public function getAll($urlImage): array 
     {
         try {
         $facturas = $this->findBy([], ['id' => 'DESC']);
@@ -128,6 +128,7 @@ class FacturaRepository extends ServiceEntityRepository
                     'tasa' => $factura->getTasa(),
                     'print' => $factura->getPrint(),
                     'tickets' => $factura->getTickets(),
+                    "fotoBill" => ($factura->getUrlBill()) ? $urlImage . $factura->getUrlBill() : null,
                     'cliente' => ($factura->getUser()!=null)?array(
                         "id"=>$factura->getUser()->getId(),
                         "tipoDocumentoIdentidad"=>$factura->getUser()->getTipoDocumentoIdentidad(),
@@ -138,7 +139,7 @@ class FacturaRepository extends ServiceEntityRepository
                                 ($factura->getUser()->getPrimerApellido() ?? '') . ' ' .
                                 ($factura->getUser()->getSegundoApellido() ?? '')
                         ),
-                        "fotoCedula" => ($factura->getUser()->getFoto()) ? $urlPhotoCI . $factura->getUser()->getFoto() : null,
+                        "fotoCedula" => ($factura->getUser()->getFoto()) ? $urlImage . $factura->getUser()->getFoto() : null,
                         ):[],
                     'local' => ($factura->getLocal()!=null)?array(
                         "id"=>$factura->getLocal()->getId(),
@@ -289,7 +290,7 @@ class FacturaRepository extends ServiceEntityRepository
 
     }
 
-    public function findBillsByEmail($email): array 
+    public function findBillsByEmail($email, $urlImage): array 
     {
         try {
             $qb = $this->createQueryBuilder('f')
@@ -302,7 +303,6 @@ class FacturaRepository extends ServiceEntityRepository
             $facturas = $qb->getQuery()->getResult();
 
             $result = [];
-            $urlPhotoCI = ''; // Define según tu configuración
 
             foreach ($facturas as $factura) {
                 $user = $factura->getUser();
@@ -316,6 +316,7 @@ class FacturaRepository extends ServiceEntityRepository
                     'tasa' => $factura->getTasa(),
                     'print' => $factura->getPrint(),
                     'tickets' => $factura->getTickets(),
+                    "fotoBill" => ($factura->getUrlBill()) ? $urlImage . $factura->getUrlBill() : null,
                     'cliente' => ($user != null) ? array(
                         "id" => $user->getId(),
                         "tipoDocumentoIdentidad" => $user->getTipoDocumentoIdentidad(),
@@ -326,7 +327,7 @@ class FacturaRepository extends ServiceEntityRepository
                             ($user->getPrimerApellido() ?? '') . ' ' .
                             ($user->getSegundoApellido() ?? '')
                         ),
-                        "fotoCedula" => ($user->getFoto()) ? $urlPhotoCI . $user->getFoto() : null,
+                        "fotoCedula" => ($user->getFoto()) ? $urlImage . $user->getFoto() : null,
                     ) : [],
                     'local' => ($factura->getLocal() != null) ? array(
                         "id" => $factura->getLocal()->getId(),
@@ -342,5 +343,26 @@ class FacturaRepository extends ServiceEntityRepository
                 'message' => 'Error al obtener las facturas: ' . $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Update Bill User.
+     */
+    public function putUrlBill($id, string $foto, $validator): JsonResponse  
+    {
+        $entityManager = $this->getEntityManager();
+        $entity =$entityManager->getRepository(Factura::class)->find($id);
+    
+        $entity->setUrlBill($foto);
+        
+        // Validar antes de guardar
+        $errors = $validator->validate($entity);
+        if ($errors->count() > 0) {
+            $errorsString = (string) $errors;
+            return new JsonResponse(['msg' => $errorsString], 422);
+        }
+        
+        $entityManager->flush();
+        return new JsonResponse(['msg' => 'Imagen factura agregada'], 200);
     }
 }

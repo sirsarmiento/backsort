@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20251018144201 extends AbstractMigration
+final class Version20251020140045 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -19,11 +19,13 @@ final class Version20251018144201 extends AbstractMigration
 
     public function up(Schema $schema) : void
     {
-        $this->addSql('ALTER TABLE tasa ADD fecha DATE DEFAULT NULL');
+        // this up() migration is auto-generated, please modify it to your needs
+        $this->addSql('ALTER TABLE factura ADD url_bill VARCHAR(255) DEFAULT NULL');
     }
 
     public function down(Schema $schema) : void
     {
-        $this->addSql('ALTER TABLE tasa DROP fecha');
+        // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql('ALTER TABLE factura DROP url_bill');
     }
 }

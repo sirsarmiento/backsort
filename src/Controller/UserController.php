@@ -75,126 +75,126 @@ class UserController extends AbstractController
     }
 
 
-        /**
-         * @Route("/api/user/upload/photo", methods={"POST"})
-         * @OA\Post(
-         * summary="User upload Photo",
-         * description="User upload Photo",
-         * operationId="useruploadphoto",
-         * tags={"Users"},
-         *      @OA\RequestBody(
-         *         @OA\MediaType(
-         *             mediaType="multipart/form-data",
-         *             @OA\Schema(
-         *                 @OA\Property(
-         *                     description="photo",
-         *                     property="photo",
-         *                     type="string",
-         *                     format="binary",
-         *                 ),
-         *             )
-         *         )
-         *     ),
-         * @OA\Response(
-         *    response=422,
-         *    description="Photo Incorrecta",
-         *    @OA\JsonContent(
-         *       @OA\Property(property="message", type="string", example="Sorry, wrong email address or password. Please try again")
-         *        )
-         *     )
-         * )
-        */ public function uploadPhoto(Request $request,ValidatorInterface $validator,FileUploader $fileUploader,UserRepository $repository): JsonResponse
-        {
-            $file = $request->files->get('photo');
-            $em =$this->getDoctrine()->getManager();
-            $user = $this->get('security.token_storage')->getToken()->getUser();
+    /**
+     * @Route("/api/user/upload/photo", methods={"POST"})
+     * @OA\Post(
+     * summary="User upload Photo",
+     * description="User upload Photo",
+     * operationId="useruploadphoto",
+     * tags={"Users"},
+     *      @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     description="photo",
+     *                     property="photo",
+     *                     type="string",
+     *                     format="binary",
+     *                 ),
+     *             )
+     *         )
+     *     ),
+     * @OA\Response(
+     *    response=422,
+     *    description="Photo Incorrecta",
+     *    @OA\JsonContent(
+     *       @OA\Property(property="message", type="string", example="Sorry, wrong email address or password. Please try again")
+     *        )
+     *     )
+     * )
+    */ public function uploadPhoto(Request $request,ValidatorInterface $validator,FileUploader $fileUploader,UserRepository $repository): JsonResponse
+    {
+        $file = $request->files->get('photo');
+        $em =$this->getDoctrine()->getManager();
+        $user = $this->get('security.token_storage')->getToken()->getUser();
 
-            $repository = $this->getDoctrine()->getRepository(User::class);
-            if ($file) {
-                
-                $brochureFileName = $fileUploader->upload($file,"fotos/".$user->getId());
-                return $repository->putPhoto($brochureFileName,$validator); 
-                
-            }else{
-                return new JsonResponse("{error:error cargando foto}",409);  
-            }   
-        }
-
-        /**
-         * @Route("/api/user/upload/photo/{id}", methods={"POST"})
-         * @OA\Post(
-         *     summary="User upload Photo by ID",
-         *     description="User upload Photo by user ID",
-         *     operationId="useruploadphotobyid",
-         *     tags={"Users"},
-         *     @OA\Parameter(
-         *         name="id",
-         *         in="path",
-         *         description="User ID",
-         *         required=true,
-         *         @OA\Schema(type="integer")
-         *     ),
-         *     @OA\RequestBody(
-         *         @OA\MediaType(
-         *             mediaType="multipart/form-data",
-         *             @OA\Schema(
-         *                 @OA\Property(
-         *                     description="photo",
-         *                     property="photo",
-         *                     type="string",
-         *                     format="binary",
-         *                 ),
-         *             )
-         *         )
-         *     ),
-         *     @OA\Response(
-         *         response=200,
-         *         description="Photo uploaded successfully",
-         *         @OA\JsonContent(
-         *             @OA\Property(property="msg", type="string", example="Registro Actualizado: username")
-         *         )
-         *     ),
-         *     @OA\Response(
-         *         response=404,
-         *         description="User not found",
-         *         @OA\JsonContent(
-         *             @OA\Property(property="message", type="string", example="User not found")
-         *         )
-         *     ),
-         *     @OA\Response(
-         *         response=422,
-         *         description="Validation error",
-         *         @OA\JsonContent(
-         *             @OA\Property(property="message", type="string", example="Validation errors")
-         *         )
-         *     ),
-         *     @OA\Response(
-         *         response=409,
-         *         description="File upload error",
-         *         @OA\JsonContent(
-         *             @OA\Property(property="error", type="string", example="error cargando foto")
-         *         )
-         *     )
-         * )
-         */
-        public function uploadCedula(Request $request, int $id, ValidatorInterface $validator, FileUploader $fileUploader, UserRepository $repository): JsonResponse
-        {
-            $file = $request->files->get('photo');
-
-            // Buscar usuario por ID en lugar del usuario autenticado
-            $user = $repository->find($id);
+        $repository = $this->getDoctrine()->getRepository(User::class);
+        if ($file) {
             
-            if (!$user) {
-                return new JsonResponse(['message' => 'User not found'], 404);
-            }
+            $brochureFileName = $fileUploader->upload($file,"fotos/".$user->getId());
+            return $repository->putPhoto($brochureFileName,$validator); 
+            
+        }else{
+            return new JsonResponse("{error:error cargando foto}",409);  
+        }   
+    }
 
-            if ($file) {
-                $brochureFileName = $fileUploader->upload($file, "fotos/" . $user->getId());
-                return $repository->putCedula($user, $brochureFileName, $validator);
-            } else {
-                return new JsonResponse(['error' => 'error cargando foto'], 409);
-            }
+    /**
+     * @Route("/api/user/upload/photo/{id}", methods={"POST"})
+     * @OA\Post(
+     *     summary="User upload Photo by ID",
+     *     description="User upload Photo by user ID",
+     *     operationId="useruploadphotobyid",
+     *     tags={"Users"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="User ID",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     description="photo",
+     *                     property="photo",
+     *                     type="string",
+     *                     format="binary",
+     *                 ),
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Photo uploaded successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="Registro Actualizado: username")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="User not found")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Validation errors")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=409,
+     *         description="File upload error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="error", type="string", example="error cargando foto")
+     *         )
+     *     )
+     * )
+     */
+    public function uploadCedula(Request $request, int $id, ValidatorInterface $validator, FileUploader $fileUploader, UserRepository $repository): JsonResponse
+    {
+        $file = $request->files->get('photo');
+
+        // Buscar usuario por ID en lugar del usuario autenticado
+        $user = $repository->find($id);
+        
+        if (!$user) {
+            return new JsonResponse(['message' => 'User not found'], 404);
         }
+
+        if ($file) {
+            $brochureFileName = $fileUploader->upload($file, "fotos/" . $user->getId());
+            return $repository->putCedula($user, $brochureFileName, $validator);
+        } else {
+            return new JsonResponse(['error' => 'error cargando foto'], 409);
+        }
+    }
 
 
 

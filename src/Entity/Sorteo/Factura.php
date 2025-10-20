@@ -92,6 +92,11 @@ class Factura
      */
     private $tickets;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $urlBill;
+
 
     public function __construct()
     {
@@ -268,6 +273,18 @@ class Factura
     public function setTickets(int $tickets): self
     {
         $this->tickets = $tickets;
+
+        return $this;
+    }
+
+    public function getUrlBill(): ?string
+    {
+        return $this->urlBill;
+    }
+
+    public function setUrlBill(?string $urlBill): self
+    {
+        $this->urlBill = $urlBill;
 
         return $this;
     }
