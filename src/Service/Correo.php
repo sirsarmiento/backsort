@@ -20,7 +20,9 @@ class Correo
         $urlApi = $this->params->get('urlapi');
 
         $logoUrl = $urlApi . 'images/Logo_CC_El_Recreo.jpg';
-        $deloreanUrl = $urlApi . 'images/Delorean.webp';
+        $deloreanUrl = $urlApi . 'images/carro.jpg';
+
+        $link = $this->params->get('urlfrom');
 
         $cuerpo = '<!DOCTYPE html>
         <html lang="es">
@@ -72,6 +74,13 @@ class Correo
                                     </p>
                                 </td>
                             </tr>
+
+                            <tr>
+                                <td style="padding: 20px 30px; text-align: center;">
+                                    <a href="' . $link . '" class="button" target="_blank">Ir a inicio de sesión</a>
+                                </td>
+                            </tr>
+
                             <tr>
                                 <td style="padding: 20px 30px 30px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
                                     <p style="font-size: 12px; color: #6b7280; margin: 0;">
@@ -105,7 +114,7 @@ class Correo
         $urlApi = $this->params->get('urlapi');
 
         $logoUrl = $urlApi . 'images/Logo_CC_El_Recreo.jpg';
-        $deloreanUrl = $urlApi . 'images/Delorean.webp';
+        $deloreanUrl = $urlApi . 'images/carro.jpg';
 
         $link = $urlfront . 'camera-scan?email=' . $destinatario;
 
@@ -171,7 +180,6 @@ class Correo
 
                             <tr>
                                 <td style="padding: 20px 30px; text-align: center;">
-                                    <!-- Enlace de prueba (dummy link) -->
                                     <a href="' . $link . '" class="button" target="_blank">Confirmar mi Correo</a>
                                 </td>
                             </tr>
@@ -207,7 +215,7 @@ class Correo
         $urlApi = $this->params->get('urlapi');
 
         $logoUrl = $urlApi . 'images/Logo_CC_El_Recreo.jpg';
-        $deloreanUrl = $urlApi . 'images/Delorean.webp';
+        $deloreanUrl = $urlApi . 'images/carro.jpg';
 
         $cuerpo = '<!DOCTYPE html>
         <html lang="es">
@@ -407,7 +415,7 @@ class Correo
         $urlApi = $this->params->get('urlapi');
 
         $logoUrl = $urlApi . 'images/Logo_CC_El_Recreo.jpg';
-        $deloreanUrl = $urlApi . 'images/Delorean.webp';
+        $deloreanUrl = $urlApi . 'images/carro.jpg';
 
         $cuerpo = '<!DOCTYPE html>
         <html lang="es">

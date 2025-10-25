@@ -116,7 +116,7 @@ class FacturaController extends AbstractController
      */
     public function findAll(Request $request,FacturaRepository $repository): JsonResponse
     {
-        $data = $repository->getAll($this->params->get('urlapilocal')); // Nube urlApi
+        $data = $repository->getAll($this->params->get('urlapi')); 
         // Verifica qué datos estás obteniendo
         if (empty($data)) {
             return new JsonResponse([
@@ -518,5 +518,70 @@ class FacturaController extends AbstractController
         } else {
             return new JsonResponse(['error' => 'error cargando foto'], 409);
         }
+    }
+
+    /**
+     * Get bills by localId, userId and numero
+     * @Route("/api/user/winner/{facturaId}", methods={"GET"})
+     * @OA\Get(
+     *     summary="Obtener factura por id",
+     *     description="Retorna una factura filtradas por id",
+     *     operationId="getBillById",
+     *     tags={"Facturas"},
+     *     @OA\Parameter(
+     *         name="facturaId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Factura obtenida exitosamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Facturas obtenidas exitosamente"),
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="user", type="string", example=1, description="Nombre del usuario"),
+     *                     @OA\Property(property="local", type="string", example=1, description="Nombre del local"),
+     *                     @OA\Property(property="numero", type="string", example="01234567", description="Numero de la factura"),
+     *                     @OA\Property(property="fecha", type="date", example="2022-04-01", description="Fecha de la factura"),
+     *                     @OA\Property(property="hora", type="string", example="09:10", description="Hora de la factura"),
+     *                     @OA\Property(property="monto", type="number", example="1540.10", description="Monto de la factura"),
+     *                     @OA\Property(property="tasa", type="number", example="171.30", description="Tasa de la factura"),
+     *                 )
+     *             ),
+     *             @OA\Property(property="count", type="integer", example=5)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="No se encontraron facturas",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="msg", type="string", example="No existen Registros")
+     *         )
+     *     )
+     * )
+     * @Security(name="Bearer")
+     */
+    public function findBillById(int $facturaId, FacturaRepository $repository): JsonResponse
+    {
+        $data = $repository->findFacturaById(
+            $facturaId, 
+        );
+
+        if (!$data || empty($data)) {
+            return new JsonResponse(['msg' => 'No existen Registros'], 404);  
+        }
+        
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Facturas obtenidas exitosamente',
+            'data' => $data,
+            'count' => count($data)
+        ], 200);  
     }
 }

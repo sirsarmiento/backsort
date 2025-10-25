@@ -138,7 +138,10 @@ class FacturaRepository extends ServiceEntityRepository
                                 ($factura->getUser()->getSegundoNombre() ?? '') . ' ' .
                                 ($factura->getUser()->getPrimerApellido() ?? '') . ' ' .
                                 ($factura->getUser()->getSegundoApellido() ?? '')
-                        ),
+                            ),
+                        'telefono' => ($factura->getUser() && $factura->getUser()->getTelefonos()->count() > 0) 
+                        ? $factura->getUser()->getTelefonos()->first()->getNumero() 
+                        : null,
                         "fotoCedula" => ($factura->getUser()->getFoto()) ? $urlImage . $factura->getUser()->getFoto() : null,
                         ):[],
                     'local' => ($factura->getLocal()!=null)?array(
@@ -364,5 +367,65 @@ class FacturaRepository extends ServiceEntityRepository
         
         $entityManager->flush();
         return new JsonResponse(['msg' => 'Imagen factura agregada'], 200);
+    }
+
+    /**
+     * Get User winner.
+     */
+    public function findFacturaById(int $facturaId): array 
+    {
+        try {
+
+        $qb = $this->createQueryBuilder('f')
+            ->leftJoin('f.user', 'u')
+            ->leftJoin('f.local', 'l')
+            ->where('f.id = :facturaId')
+            ->setParameter('facturaId', $facturaId);
+
+            $facturas = $qb->getQuery()->getResult();
+
+            $result = [];
+
+            foreach ($facturas as $factura) {
+                $user = $factura->getUser();
+                $result[] = [
+                    'id' => $factura->getId(),
+                    'numero' => $factura->getNumero(),
+                    'fecha' => $factura->getFecha()->format("Y-m-d"),
+                    'hora' => $factura->getHora(),
+                    'monto' => $factura->getMonto(),
+                    'montoMin' => $factura->getMontoMin(),
+                    'tasa' => $factura->getTasa(),
+                    'print' => $factura->getPrint(),
+                    'tickets' => $factura->getTickets(),
+                    'cliente' => ($user != null) ? array(
+                        "id" => $user->getId(),
+                        "tipoDocumentoIdentidad" => $user->getTipoDocumentoIdentidad(),
+                        "nroDocumentoIdentidad" => $user->getNumeroDocumento(),
+                        "nombreCompleto" => trim(
+                            ($user->getPrimerNombre() ?? '') . ' ' .
+                            ($user->getSegundoNombre() ?? '') . ' ' .
+                            ($user->getPrimerApellido() ?? '') . ' ' .
+                            ($user->getSegundoApellido() ?? '')
+                        ),
+                        "email" => $user->getEmail(),
+                    ) : [],
+                    'local' => ($factura->getLocal() != null) ? array(
+                        "id" => $factura->getLocal()->getId(),
+                        "nombre" => $factura->getLocal()->getNombre()
+                    ) : [],
+                    'telefono' => ($user->getTelefonos()->count() > 0) ? array(
+                        "numero" => $user->getTelefonos()->first()->getNumero(),
+                    ) : [],
+                ];
+            }
+
+            return $result;
+            
+        } catch (\Exception $e) {
+            return [
+                'message' => 'Error al obtener las facturas: ' . $e->getMessage()
+            ];
+        }
     }
 }
